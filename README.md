@@ -23,9 +23,18 @@ cp .env.example .env.local   # ajusta VITE_API_URL (local: http://localhost:8080
 npm run dev                  # http://localhost:5173
 ```
 
-## Despliegue
+## Despliegue (Render, a través del API Gateway)
 
-- **Vercel**: importa el repositorio, framework *Vite*, variable `VITE_API_URL` = URL del gateway.
-  `vercel.json` redirige todas las rutas a `index.html` (SPA).
+El sitio se publica en el mismo link del gateway: **https://insureflow-gateway-kxhm.onrender.com**.
+
+```bash
+npm run build:gateway
+```
+
+compila con la API en el mismo dominio y deja el resultado en
+`../API_Gateway/InsureFlow_API_Gateway/proxy/sitio`. Luego se hace commit y push del gateway y en
+Render: **Manual Deploy → Deploy latest commit**. El gateway devuelve `index.html` para cualquier
+ruta que no sea de la API y WhiteNoise sirve `/assets/*`.
+
 - **CI** (`.github/workflows/ci.yml`): verificación de tipos, build y `npm audit` en cada push.
-- En el gateway, `CORS_ALLOWED_ORIGINS` debe incluir el dominio de Vercel.
+- `vercel.json` queda listo por si más adelante se publica también en Vercel.

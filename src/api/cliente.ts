@@ -1,6 +1,7 @@
 // Cliente HTTP del API Gateway de InsureFlow.
 // El frontend solo habla con el gateway; él valida el JWT y enruta a cada microservicio.
-export const API_URL = (import.meta.env.VITE_API_URL || "https://insureflow-gateway-kxhm.onrender.com").replace(/\/$/, "");
+// Vacío = mismo dominio (cuando el gateway sirve esta página). En desarrollo se usa .env.local.
+export const API_URL = (import.meta.env.VITE_API_URL ?? "https://insureflow-gateway-kxhm.onrender.com").replace(/\/$/, "");
 
 const CLAVE_SESION = { cliente: "if_cliente", gestion: "if_gestion" } as const;
 export type Ambito = keyof typeof CLAVE_SESION;

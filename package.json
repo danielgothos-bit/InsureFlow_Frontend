@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:gateway": "tsc -b && vite build --mode gateway --outDir ../API_Gateway/InsureFlow_API_Gateway/proxy/sitio --emptyOutDir"
   },
   "dependencies": {
     "react": "18.3.1",
