@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import Icono from "../../components/Icono";
 import VistaDocumento from "../../components/Documento";
+import { TarjetaNotificacion } from "../../components/Notificacion";
 import { Logo } from "../../components/Marca";
 import { BarrasAgrupadas, BarrasH } from "../../components/Graficas";
 import { Area, Boton, Cargando, Entrada, Estado, Linea, Mensaje, Modal, Selector, Tabla, Tarjeta, useAviso, Vacio } from "../../components/ui";
@@ -488,7 +489,20 @@ function DetalleCaso({ id, volver }: { id: string; volver: () => void }) {
             {prog && <><Area label="Registrar informe del perito" placeholder="Hallazgos de la inspección" value={hallazgos} onChange={(e) => setHallazgos(e.target.value)} />
               <Boton v="azul" className="mt-3 w-full" disabled={a.ocupado || !hallazgos.trim()} onClick={() => a.correr(() => api(`/api/v1/inspecciones/${prog.id_inspeccion}/informe`, { method: "PUT", body: { findings: hallazgos.trim() } }), "Informe registrado.")}>Registrar informe</Boton></>}
           </Tarjeta>
-          <Tarjeta titulo="Historial"><ul className="space-y-3">{h.historial.map((x, i) => <li key={i} className="border-l-2 border-azul pl-3"><Estado k={x.new_status} /><div className="mt-1 text-xs text-gris-texto">{fecha(x.changed_at)}</div></li>)}</ul></Tarjeta>
+          <Tarjeta titulo="Historial del caso">
+            <ol className="relative ml-2 border-l-2 border-azul-claro">
+              {h.historial.map((x, i) => {
+                const ultimo = i === h.historial.length - 1;
+                return (
+                  <li key={i} className="relative mb-5 pl-6 last:mb-0">
+                    <span className={`absolute -left-[9px] top-0.5 grid h-4 w-4 place-items-center rounded-full ring-4 ring-white ${ultimo ? "bg-rojo" : "bg-azul"}`} />
+                    <b className="block text-sm text-azul-tinta">{ESTADOS[x.new_status]?.[0] || x.new_status}</b>
+                    <span className="text-xs text-gris-texto">{fecha(x.changed_at)}</span>
+                  </li>
+                );
+              })}
+            </ol>
+          </Tarjeta>
           <Tarjeta titulo="Indemnización">{pagos.length ? pagos.map((p) => <div key={p.paid_at}><p className="font-titulo text-3xl text-azul">{dinero(p.amount)}</p><p className="mt-1 text-sm"><Estado k={p.status} /> {fecha(p.paid_at)}</p></div>)
             : <Vacio texto="Se paga automáticamente al aprobar el caso." icono="dinero" />}</Tarjeta>
         </div>
@@ -496,9 +510,12 @@ function DetalleCaso({ id, volver }: { id: string; volver: () => void }) {
           <Tarjeta titulo="Documentos">{docs.length ? docs.map((d) => <div key={d.id_documento} className="flex items-center justify-between border-b border-gris-borde py-3 last:border-0">
             <div><b className="text-sm">{DOCUMENTOS[d.document_type] || d.document_type}</b><div className="text-xs text-gris-texto">{fecha(d.uploaded_at)}</div></div><Boton v="borde" chico onClick={() => doc.abrir(d)}>Ver</Boton></div>)
             : <Vacio texto="Sin documentos todavía." />}</Tarjeta>
-          <Tarjeta titulo="Comunicaciones al asegurado">{notis.length ? notis.filter((n) => !n.id_siniestro || n.id_siniestro === id).map((n, i) => (
-            <div key={i} className="flex justify-between gap-4 border-b border-gris-borde py-3 text-sm last:border-0"><div>{n.mensaje}<div className="text-xs text-gris-texto">{fecha(n.sent_at)}</div></div><Estado k={n.status} /></div>))
-            : <Vacio texto="Sin comunicaciones." icono="campana" />}</Tarjeta>
+          {(() => {
+            // Solo los mensajes de este caso (los de pólizas y cuotas se ven en el historial del asegurado).
+            const delCaso = notis.filter((n) => n.id_siniestro === id || n.mensaje.includes(id));
+            return <Tarjeta titulo="Comunicaciones del caso al asegurado" extra={<span className="text-sm text-gris-texto">{delCaso.length} mensajes</span>}>
+              {delCaso.length ? delCaso.map((n, i) => <TarjetaNotificacion key={i} n={n} estado />) : <Vacio texto="Sin comunicaciones para este caso." icono="campana" />}</Tarjeta>;
+          })()}
         </div>
         {doc.modal}
       </>);

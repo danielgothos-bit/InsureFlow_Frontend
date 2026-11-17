@@ -81,7 +81,7 @@ function Informe({ c, hallazgos }: { c: Campos; hallazgos: string }) {
         <div className="border border-gris-borde px-5">
           <Fila k="Caso" v={numCaso(c["siniestro"] || "")} />
           <Fila k="N.º de inspección" v={corto(c["inspección"] || c["inspeccion"])} />
-          <Fila k="Perito asignado" v={corto(c["perito"])} />
+          <Fila k="Realizada por" v="Perito certificado InsureFlow" />
           <Fila k="Fecha de la inspección" v={fechaLarga(c["fecha"])} />
         </div>
         <h4 className="mt-6 text-sm font-bold uppercase tracking-wide text-gris-texto">Hallazgos del perito</h4>

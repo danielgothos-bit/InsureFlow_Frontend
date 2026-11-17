@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import Icono from "../../components/Icono";
 import VistaDocumento from "../../components/Documento";
+import { TarjetaNotificacion } from "../../components/Notificacion";
 import { Area, Boton, Cargando, Entrada, Estado, Linea, Mensaje, Modal, Selector, Tabla, Tarjeta, useAviso, Vacio } from "../../components/ui";
 import { abrirDocumento, api } from "../../api/cliente";
 import { useCarga, useSesion } from "../../api/sesion";
@@ -361,11 +362,7 @@ export function Notificaciones() {
   const { datos, error } = useCarga(m.notis, []);
   if (error) return <Falla e={error} />;
   return <><Titulo t="Notificaciones" s="Mensajes que te hemos enviado." />
-    <Tarjeta>{!datos ? <Cargando /> : datos.length ? datos.map((n, i) => (
-      <div key={i} className="flex gap-4 border-b border-gris-borde py-4 last:border-0">
-        <span className="grid h-10 w-10 flex-none place-items-center bg-azul-claro text-azul"><Icono n="campana" /></span>
-        <div><p className="text-sm text-azul-tinta">{n.mensaje}</p><p className="mt-1 text-xs text-gris-texto">{fechaHora(n.sent_at)} · {n.canal === "sms" ? "SMS" : "Correo"}</p></div>
-      </div>)) : <Vacio texto="No tienes notificaciones." icono="campana" />}</Tarjeta></>;
+    <Tarjeta>{!datos ? <Cargando /> : datos.length ? datos.map((n, i) => <TarjetaNotificacion key={i} n={n} />) : <Vacio texto="No tienes notificaciones." icono="campana" />}</Tarjeta></>;
 }
 
 export function Perfil() {
