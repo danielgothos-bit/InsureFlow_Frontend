@@ -276,8 +276,16 @@ function VPagos() {
   const c = useCarga(() => api<Poliza[]>("/api/v1/polizas"), []);
   const [sel, setSel] = useState("");
   const id = sel || c.datos?.[0]?.id_poliza || "";
-  const h = useCarga(() => (id ? api<Pago[]>(`/api/v1/pagos/primas/poliza/${id}`) : Promise.resolve([])), [id]);
-  const a = useAccion(h.recargar);
+  // Historial de pagos + comprobantes de la póliza (Documentación los genera al recibir payment.completed).
+  const h = useCarga(async () => {
+    if (!id) return { pagos: [] as Pago[], comprobantes: {} as Record<string, Documento> };
+    const [pagos, docs] = await Promise.all([api<Pago[]>(`/api/v1/pagos/primas/poliza/${id}`), api<Documento[]>(`/api/v1/documentos/poliza/${id}`).catch(() => [] as Documento[])]);
+    const comprobantes = Object.fromEntries(docs.filter((d) => d.document_type === "comprobante_pago").map((d) => [d.nombre_archivo, d]));
+    return { pagos, comprobantes };
+  }, [id]);
+  // El comprobante llega unos segundos después del pago (evento asíncrono): se vuelve a consultar.
+  const a = useAccion(() => { h.recargar(); setTimeout(h.recargar, 5000); });
+  const doc = useDocumento();
   const p = c.datos?.find((x) => x.id_poliza === id);
   const [f, setF] = useState({ valor: "", metodo: "pse", venc: hoy() });
   useEffect(() => { if (p) setF((x) => ({ ...x, valor: String(cuotaMensual(p.premium)) })); }, [p?.id_poliza]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -294,10 +302,17 @@ function VPagos() {
         {a.error}
       </Tarjeta>
       <Tarjeta titulo="Historial de pagos de la póliza">
-        {!h.datos ? <Cargando texto="Cargando…" /> : h.datos.length ? <Tabla cols={["Fecha", "Medio", "Valor", "Estado"]} filas={h.datos} fila={(x) => (
-          <tr key={(x.id_pago || "") + x.paid_at}><td>{fecha(x.paid_at)}</td><td className="uppercase">{x.method}</td><td><b>{dinero(x.amount)}</b></td><td><Estado k={x.status} /></td></tr>)} />
+        {!h.datos ? <Cargando texto="Cargando…" /> : h.datos.pagos.length ? <Tabla cols={["Fecha", "Medio", "Valor", "Estado", "Comprobante"]} filas={h.datos.pagos} fila={(x) => {
+          const comp = h.datos!.comprobantes[`comprobante_${x.id_pago}.txt`];
+          return (
+            <tr key={(x.id_pago || "") + x.paid_at}><td>{fecha(x.paid_at)}</td><td className="uppercase">{x.method}</td><td><b>{dinero(x.amount)}</b></td><td><Estado k={x.status} /></td>
+              <td>{comp ? <Boton v="borde" chico onClick={() => doc.abrir(comp)}><Icono n="documento" className="h-4 w-4" />Ver</Boton>
+                : <span className="text-xs text-gris-texto">{x.status === "pagado" ? "Generando…" : "—"}</span>}</td></tr>
+          );
+        }} />
           : <Vacio texto="Esta póliza todavía no tiene pagos." icono="tarjeta" />}
       </Tarjeta>
+      {doc.modal}
     </div>
   ));
 }
