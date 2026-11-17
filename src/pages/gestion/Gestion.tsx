@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import Icono from "../../components/Icono";
+import VistaDocumento from "../../components/Documento";
 import { Logo } from "../../components/Marca";
 import { BarrasAgrupadas, BarrasH } from "../../components/Graficas";
 import { Area, Boton, Cargando, Entrada, Estado, Linea, Mensaje, Modal, Selector, Tabla, Tarjeta, useAviso, Vacio } from "../../components/ui";
@@ -431,7 +432,7 @@ function useDocumento() {
     try { const t = await abrirDocumento(d.id_documento, d.nombre_archivo); if (t != null) setVer([DOCUMENTOS[d.document_type] || "Documento", t]); }
     catch (e) { avisar((e as Error).message, false); }
   };
-  return { abrir, modal: ver && <Modal titulo={ver[0]} onClose={() => setVer(null)}><pre className="whitespace-pre-wrap bg-gris-fondo p-4 font-mono text-sm">{ver[1]}</pre></Modal> };
+  return { abrir, modal: ver && <Modal titulo={ver[0]} onClose={() => setVer(null)}><VistaDocumento texto={ver[1]} /></Modal> };
 }
 
 function DetalleCaso({ id, volver }: { id: string; volver: () => void }) {

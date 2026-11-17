@@ -5,3 +5,12 @@
 html { scroll-behavior: smooth; }
 body { @apply bg-white font-sans text-azul-tinta antialiased; }
 :focus-visible { outline: 3px solid #E3001B; outline-offset: 2px; }
+
+/* Al imprimir un documento solo sale el recibo, sin el resto de la página. */
+@media print {
+  body * { visibility: hidden; }
+  .imprimible, .imprimible * { visibility: visible; }
+  .imprimible { position: absolute; left: 0; top: 0; width: 100%; max-width: none; box-shadow: none; }
+  .no-imprimir { display: none; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

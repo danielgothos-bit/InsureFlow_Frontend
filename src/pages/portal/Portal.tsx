@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import Icono from "../../components/Icono";
+import VistaDocumento from "../../components/Documento";
 import { Area, Boton, Cargando, Entrada, Estado, Linea, Mensaje, Modal, Selector, Tabla, Tarjeta, useAviso, Vacio } from "../../components/ui";
 import { abrirDocumento, api } from "../../api/cliente";
 import { useCarga, useSesion } from "../../api/sesion";
@@ -337,7 +338,7 @@ function ListaDocs({ docs }: { docs: Documento[] }) {
           <Boton v="borde" chico onClick={() => abrir(d)}>Ver</Boton>
         </div>
       ))}
-      {ver && <Modal titulo={ver[0]} onClose={() => setVer(null)}><pre className="whitespace-pre-wrap bg-gris-fondo p-4 font-mono text-sm">{ver[1]}</pre></Modal>}
+      {ver && <Modal titulo={ver[0]} onClose={() => setVer(null)}><VistaDocumento texto={ver[1]} /></Modal>}
     </>
   );
 }
