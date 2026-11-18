@@ -7,7 +7,7 @@ import { TarjetaNotificacion } from "../../components/Notificacion";
 import { Area, Boton, Cargando, Entrada, Estado, Linea, Mensaje, Modal, Selector, Tabla, Tarjeta, useAviso, Vacio } from "../../components/ui";
 import { abrirDocumento, api } from "../../api/cliente";
 import { useCarga, useSesion } from "../../api/sesion";
-import { cuotaMensual, dia, dinero, DOCUMENTOS, fecha, fechaHora, hoy, numCaso, numPoliza, PASOS_CASO, PRODUCTOS } from "../../api/formato";
+import { cuotaMensual, dia, fechaLocal, dinero, DOCUMENTOS, fecha, fechaHora, hoy, numCaso, numPoliza, PASOS_CASO, PRODUCTOS } from "../../api/formato";
 import type { Asegurado, Documento, Historial, Inspeccion, Notificacion, Pago, Poliza, Siniestro } from "../../api/tipos";
 
 const MENU: [string, string, string][] = [
@@ -226,8 +226,9 @@ export function NuevoSiniestro() {
   const nav = useNavigate();
   const avisar = useAviso();
   const { datos, error } = useCarga(async () => (await m.polizas()).filter((p) => p.status === "activa"), []);
-  const hace1h = new Date(Date.now() - 3600e3).toTimeString().slice(0, 5);
-  const [f, setF] = useState({ poliza: id || "", fecha: hoy(), hora: hace1h, valor: "", desc: "" });
+  // Por defecto: hace una hora (fecha y hora del mismo instante, para no quedar en el futuro después de medianoche).
+  const hace1h = new Date(Date.now() - 3600e3);
+  const [f, setF] = useState({ poliza: id || "", fecha: fechaLocal(hace1h), hora: hace1h.toTimeString().slice(0, 5), valor: "", desc: "" });
   const [msg, setMsg] = useState("");
   const [ocupado, setOcupado] = useState(false);
   if (error) return <Falla e={error} />;

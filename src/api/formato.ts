@@ -4,7 +4,9 @@ export const dinero = (v: unknown) => (v == null || v === "" ? "—" : "$" + Num
 export const fecha = (v?: string) => (v ? new Date(v).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" }) : "—");
 export const fechaHora = (v?: string) => (v ? new Date(v).toLocaleString("es-CO", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "—");
 export const dia = (v?: string) => (v ? new Date(v + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" }) : "—");
-export const hoy = (d = 0) => { const x = new Date(); x.setDate(x.getDate() + d); return x.toISOString().slice(0, 10); };
+// Fecha local (hora de Colombia del navegador), no UTC: de noche toISOString() ya daría el día siguiente.
+export const fechaLocal = (x: Date) => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+export const hoy = (d = 0) => { const x = new Date(); x.setDate(x.getDate() + d); return fechaLocal(x); };
 export const numPoliza = (p: Pick<Poliza, "product_type" | "id_poliza">) =>
   `${({ auto: "AU", hogar: "HO", vida: "VI" } as Record<string, string>)[p.product_type] || "PO"}-${String(p.id_poliza).slice(0, 6).toUpperCase()}`;
 export const numCaso = (id: string) => `SN-${String(id).slice(0, 6).toUpperCase()}`;
