@@ -224,9 +224,18 @@ function VAsegurados() {
       {lista.length ? <Tabla cols={["Asegurado", "Identificación", "Contacto", "Identidad", ""]} filas={lista} buscar={(x) => `${x.nombre} ${x.apellido} ${x.national_id} ${x.email}`} fila={(x) => (
         <tr key={x.id_asegurado}>
           <td><Persona n={`${x.nombre} ${x.apellido}`} s={`Cliente desde ${dia(x.fecha_registro?.slice(0, 10))}`} /></td><td>{x.national_id}</td>
-          <td>{x.email}<div className="text-xs text-gris-texto">{x.telefono}</div></td><td><Estado k={x.kyc_status} /></td>
-          <td className="text-right">{x.kyc_status === "pendiente" && <Boton v="borde" chico disabled={a.ocupado}
-            onClick={() => a.correr(() => api(`/api/v1/asegurados/${x.id_asegurado}/kyc`, { method: "PUT", body: { kyc_status: "verificado" } }), "Identidad verificada.")}>Verificar identidad</Boton>}</td>
+          <td>{x.email}<div className="text-xs text-gris-texto">{x.telefono}</div></td>
+          <td>{x.kyc_status === "rechazado"
+            ? <span className="inline-block rounded-full bg-rojo-claro px-2.5 py-0.5 text-xs font-bold text-rojo-oscuro">Rechazada · cuenta bloqueada</span>
+            : <Estado k={x.kyc_status} />}</td>
+          <td className="whitespace-nowrap text-right"><div className="flex justify-end gap-2">
+            {x.kyc_status !== "verificado" && <Boton v="borde" chico disabled={a.ocupado}
+              onClick={() => a.correr(() => api(`/api/v1/asegurados/${x.id_asegurado}/kyc`, { method: "PUT", body: { kyc_status: "verificado" } }),
+                x.kyc_status === "rechazado" ? "Identidad verificada: la cuenta fue desbloqueada." : "Identidad verificada.")}>Verificar identidad</Boton>}
+            {x.kyc_status === "pendiente" && <Boton v="peligro" chico disabled={a.ocupado}
+              onClick={() => confirm(`¿Rechazar la identidad de ${x.nombre} ${x.apellido}? Su cuenta quedará bloqueada hasta que se verifique.`)
+                && a.correr(() => api(`/api/v1/asegurados/${x.id_asegurado}/kyc`, { method: "PUT", body: { kyc_status: "rechazado" } }), "Identidad rechazada: la cuenta del cliente quedó bloqueada.")}>Rechazar identidad</Boton>}
+          </div></td>
         </tr>)} /> : <Vacio texto="Todavía no hay asegurados. Los clientes se registran desde el sitio principal." icono="usuarios" />}
       {a.error}
     </Tarjeta>
