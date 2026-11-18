@@ -100,7 +100,7 @@ export default function VistaDocumento({ texto }: { texto: string }) {
         {tipo === "pago" ? <Comprobante c={campos} /> : tipo === "informe" ? <Informe c={campos} hallazgos={resto} /> :
           <pre className="whitespace-pre-wrap p-6 font-mono text-sm">{texto}</pre>}
         <p className="border-t border-gris-borde bg-gris-fondo px-7 py-3 text-center text-xs text-gris-texto">
-          Documento generado electrónicamente por InsureFlow Seguros. Sitio de demostración: los valores son simulados.
+          Documento generado electrónicamente por InsureFlow Seguros.
         </p>
       </div>
       <div className="no-imprimir mt-5 flex justify-center">

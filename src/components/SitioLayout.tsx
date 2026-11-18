@@ -82,7 +82,6 @@ export default function SitioLayout() {
         <div className="border-t border-white/10">
           <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-2 px-4 py-5 text-xs text-white/60">
             <span>© {new Date().getFullYear()} InsureFlow Seguros · Proyecto académico, Universidad Cooperativa de Colombia</span>
-            <span>Sitio de demostración: los pagos y pólizas son simulados.</span>
           </div>
         </div>
       </footer>

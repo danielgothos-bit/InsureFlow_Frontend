@@ -48,7 +48,7 @@ export default function MediosPago({ medio, setMedio, setListo, referencia }: {
               <option value="">Selecciona tu banco…</option>{BANCOS.map((b) => <option key={b}>{b}</option>)}</Selector>
             <Selector label="Tipo de persona" value={pse.persona} onChange={(e) => setPse({ ...pse, persona: e.target.value })}>
               <option value="natural">Persona natural</option><option value="juridica">Persona jurídica</option></Selector>
-            <p className="mt-3 text-xs text-gris-texto sm:col-span-2">Al pagar, en una pasarela real serías redirigido al portal de tu banco para autorizar el débito.</p>
+            <p className="mt-3 text-xs text-gris-texto sm:col-span-2">Al confirmar el pago autorizas el débito desde la cuenta del banco seleccionado.</p>
           </div>
         )}
         {medio === "tarjeta" && (
@@ -70,12 +70,9 @@ export default function MediosPago({ medio, setMedio, setListo, referencia }: {
         )}
         {medio === "transferencia" && (
           <div className="text-sm">
-            <p className="font-bold text-azul-tinta">Datos para la transferencia</p>
-            <div className="mt-2 grid gap-1 text-gris-texto sm:grid-cols-2">
-              <span>Banco: <b className="text-azul-tinta">Banco de demostración</b></span><span>Cuenta de ahorros: <b className="text-azul-tinta">000-000000-00 (ficticia)</b></span>
-              <span>Titular: <b className="text-azul-tinta">InsureFlow Seguros (proyecto académico)</b></span>
-              {referencia && <span className="sm:col-span-2">Referencia de pago: <b className="text-azul-tinta">{referencia}</b></span>}
-            </div>
+            <p className="font-bold text-azul-tinta">Pago por transferencia</p>
+            <p className="mt-1 text-gris-texto">Realiza la transferencia desde la app de tu banco o billetera digital usando esta referencia. El pago queda registrado en tu historial y el comprobante en Mis documentos.</p>
+            {referencia && <p className="mt-2 text-gris-texto">Referencia de pago: <b className="text-azul-tinta">{referencia}</b></p>}
           </div>
         )}
         <p className="mt-3 flex items-center gap-2 text-xs font-semibold text-emerald-700"><Icono n="candado" className="h-4 w-4" />Pago protegido: no almacenamos los datos de tu tarjeta ni de tu cuenta.</p>
