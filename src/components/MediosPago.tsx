@@ -78,7 +78,7 @@ export default function MediosPago({ medio, setMedio, setListo, referencia }: {
             </div>
           </div>
         )}
-        <p className="mt-3 flex items-center gap-2 text-xs font-semibold text-amber-800"><Icono n="candado" className="h-4 w-4" />Pago simulado: es un sitio de demostración y no se cobra dinero real.</p>
+        <p className="mt-3 flex items-center gap-2 text-xs font-semibold text-emerald-700"><Icono n="candado" className="h-4 w-4" />Pago protegido: no almacenamos los datos de tu tarjeta ni de tu cuenta.</p>
       </div>
     </div>
   );
