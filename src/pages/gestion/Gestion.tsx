@@ -468,6 +468,8 @@ function DetalleCaso({ id, volver }: { id: string; volver: () => void }) {
     <Boton v="borde" chico className="mb-4" onClick={volver}><Icono n="atras" className="h-4 w-4" />Volver a la bandeja</Boton>
     {conCarga(c, ({ s, h, insp, pagos, docs, notis, aseg }) => {
       const prog = insp.find((i) => i.status === "programada");
+      const informe = insp.find((i) => i.status === "completada");
+      const decidir = ["abierto", "en_peritaje", "documentacion_pendiente"].includes(s.status);
       const estado = (nuevo: string, t: string) => a.correr(() => api(`/api/v1/siniestros/${id}/estado`, { method: "PUT", body: { status: nuevo, changed_by: usuario!.id } }), `Caso actualizado: ${t}.`);
       return (<>
         <Tarjeta titulo={<>Caso {numCaso(s.id_siniestro)} <Estado k={s.status} /></>} extra={<span className="flex items-center gap-1.5 text-xs text-gris-texto"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />Actualizando</span>}>
@@ -476,10 +478,19 @@ function DetalleCaso({ id, volver }: { id: string; volver: () => void }) {
             <Linea k="Asegurado" v={aseg ? `${aseg.nombre} ${aseg.apellido}` : "—"} /><Linea k="Valor estimado" v={dinero(s.estimated_amount)} />
             <Linea k="Descripción" v={s.descripcion} /><Linea k="Ocurrió" v={fecha(s.incident_date)} />
           </div>
-          {["abierto", "en_peritaje", "documentacion_pendiente"].includes(s.status) && <div className="mt-5 flex flex-wrap gap-2">
-            <Boton v="borde" chico disabled={a.ocupado} onClick={() => estado("documentacion_pendiente", "documentación solicitada")}>Solicitar documentación</Boton>
-            <Boton v="azul" chico disabled={a.ocupado} onClick={() => estado("aprobado", "aprobado")}>Aprobar</Boton>
-            <Boton v="peligro" chico disabled={a.ocupado} onClick={() => confirm("¿Rechazar este siniestro?") && estado("rechazado", "rechazado")}>Rechazar</Boton></div>}
+          {decidir && (
+            <div className={`mt-5 border-l-4 p-4 ${informe ? "border-amber-500 bg-amber-50" : "border-azul bg-azul-claro"}`}>
+              <p className="text-sm font-bold text-azul-tinta">{informe ? "El perito ya envió su informe: revisa los hallazgos y decide la indemnización." : "Decisión del gestor"}</p>
+              {informe ? <p className="mt-1 text-sm text-gris-texto"><b>Hallazgos del perito:</b> {informe.findings}</p>
+                : <p className="mt-1 text-sm text-gris-texto">Para aprobar el pago espera el informe del perito. Puedes rechazar o pedir documentos en cualquier momento.</p>}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Boton v="azul" chico disabled={a.ocupado || !informe} title={informe ? "" : "Disponible cuando el perito envíe su informe"}
+                  onClick={() => confirm(`¿Aprobar la indemnización de ${dinero(s.estimated_amount)}? Se ejecutará el pago.`) && estado("aprobado", "aprobado, se ejecuta el pago")}>Aprobar y pagar</Boton>
+                <Boton v="peligro" chico disabled={a.ocupado} onClick={() => confirm("¿Rechazar este siniestro? No se pagará la indemnización.") && estado("rechazado", "rechazado")}>Rechazar</Boton>
+                <Boton v="borde" chico disabled={a.ocupado} onClick={() => estado("documentacion_pendiente", "documentación solicitada")}>Solicitar documentación</Boton>
+              </div>
+            </div>
+          )}
           {a.error}
         </Tarjeta>
         <div className="mt-6 grid gap-6 xl:grid-cols-3">
@@ -543,7 +554,8 @@ function DetallePerito({ id, volver }: { id: string; volver: () => void }) {
             <Area label="Hallazgos de la inspección" placeholder="Describe los daños encontrados, su causa y la reparación recomendada." value={txt} onChange={(e) => setTxt(e.target.value)} />
             <Boton v="azul" className="mt-4" disabled={a.ocupado || !txt.trim()} onClick={() => a.correr(() => api(`/api/v1/inspecciones/${mia.id_inspeccion}/informe`, { method: "PUT", body: { findings: txt.trim() } }), "Informe enviado.")}>Enviar informe</Boton>
             {a.error}
-          </> : mia ? <p className="bg-azul-claro p-4 text-sm"><b>Informe enviado:</b> {mia.findings}</p> : <Vacio texto="Sin inspección." icono="buscar" />}
+          </> : mia ? <div className="bg-azul-claro p-4 text-sm"><p><b>Informe enviado:</b> {mia.findings}</p>
+            <p className="mt-2 text-gris-texto">El gestor de seguros revisará el informe y decidirá si se aprueba o se rechaza la indemnización.</p></div> : <Vacio texto="Sin inspección." icono="buscar" />}
         </Tarjeta>
       </>);
     })}

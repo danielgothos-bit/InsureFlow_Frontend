@@ -287,7 +287,9 @@ export function Caso() {
   const ins = i[0];
   const mensaje: Record<string, string> = {
     abierto: "Recibimos tu reporte y estamos asignando un perito.",
-    en_peritaje: `Un perito fue asignado a tu caso${ins ? " para el " + fechaHora(ins.scheduled_at) : ""}.`,
+    en_peritaje: ins?.status === "completada"
+      ? "El perito ya envió su informe. Un gestor está revisando tu caso para decidir la indemnización."
+      : `Un perito fue asignado a tu caso${ins ? " para el " + fechaHora(ins.scheduled_at) : ""}.`,
     documentacion_pendiente: "Necesitamos documentos adicionales. Te contactaremos para indicarte cuáles.",
     aprobado: "¡Tu caso fue aprobado! Estamos procesando el pago.", pagado: "El pago de tu indemnización fue realizado.",
     rechazado: "Tu caso no fue aprobado. Un asesor te contactará con el detalle.",
