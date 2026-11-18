@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import Icono from "../../components/Icono";
 import VistaDocumento from "../../components/Documento";
+import MediosPago, { type Medio } from "../../components/MediosPago";
 import { TarjetaNotificacion } from "../../components/Notificacion";
 import { Area, Boton, Cargando, Entrada, Estado, Linea, Mensaje, Modal, Selector, Tabla, Tarjeta, useAviso, Vacio } from "../../components/ui";
 import { abrirDocumento, api } from "../../api/cliente";
@@ -154,7 +155,8 @@ export function Pagos() {
   const { datos: pol, error } = useCarga(async () => (await m.polizas()).filter((p) => p.status !== "cancelada"), []);
   const sel = pol?.find((p) => p.id_poliza === id) || pol?.[0];
   const hist = useCarga(() => (sel ? api<Pago[]>(`/api/v1/pagos/primas/poliza/${sel.id_poliza}`) : Promise.resolve([])), [sel?.id_poliza]);
-  const [f, setF] = useState({ valor: "", mes: hoy().slice(0, 7), medio: "pse" });
+  const [f, setF] = useState<{ valor: string; mes: string; medio: Medio }>({ valor: "", mes: hoy().slice(0, 7), medio: "pse" });
+  const [medioListo, setMedioListo] = useState(false);
   const [msg, setMsg] = useState<[("info" | "bad"), string] | null>(null);
   const [ocupado, setOcupado] = useState(false);
   useEffect(() => { if (sel) setF((x) => ({ ...x, valor: String(cuotaMensual(sel.premium)) })); }, [sel?.id_poliza]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -180,9 +182,8 @@ export function Pagos() {
           <Entrada label="Valor a pagar" type="number" value={f.valor} onChange={(e) => setF({ ...f, valor: e.target.value })} />
           <p className="mt-1 text-xs text-gris-texto">Cuota mensual sugerida: {dinero(cuotaMensual(sel.premium))}</p>
           <Entrada label="Mes que pagas" type="month" value={f.mes} onChange={(e) => setF({ ...f, mes: e.target.value })} />
-          <Selector label="Medio de pago" value={f.medio} onChange={(e) => setF({ ...f, medio: e.target.value })}>
-            <option value="pse">PSE – débito bancario</option><option value="tarjeta">Tarjeta de crédito</option><option value="transferencia">Transferencia</option></Selector>
-          <Boton className="mt-6 w-full" disabled={ocupado} onClick={pagar}><Icono n="candado" />Pagar {dinero(f.valor)}</Boton>
+          <MediosPago medio={f.medio} setMedio={(m) => setF((x) => ({ ...x, medio: m }))} setListo={setMedioListo} referencia={numPoliza(sel)} />
+          <Boton className="mt-6 w-full" disabled={ocupado || !medioListo} onClick={pagar}><Icono n="candado" />Pagar {dinero(f.valor)}</Boton>
           {msg && <Mensaje tipo={msg[0]}>{msg[1]}</Mensaje>}
         </Tarjeta>
         <Tarjeta titulo="Historial de pagos" extra={<span className="text-sm text-gris-texto">Póliza {numPoliza(sel)}</span>}>

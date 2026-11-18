@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import Icono from "../../components/Icono";
 import { Ilustracion } from "../../components/Marca";
+import MediosPago, { type Medio } from "../../components/MediosPago";
 import { Boton, Entrada, Linea, Mensaje, Selector } from "../../components/ui";
 import { api } from "../../api/cliente";
 import { useSesion } from "../../api/sesion";
@@ -28,7 +29,8 @@ export default function Cotizar() {
   const [ocupado, setOcupado] = useState(false);
   const [benef, setBenef] = useState({ nombre: "", id: "", rel: "Cónyuge" });
   const [acepto, setAcepto] = useState(false);
-  const [medio, setMedio] = useState("pse");
+  const [medio, setMedio] = useState<Medio>("pse");
+  const [medioListo, setMedioListo] = useState(false);
   const [listo, setListo] = useState(false);
 
   useEffect(() => { try { sessionStorage.setItem(CLAVE, JSON.stringify(e)); } catch { /* sin almacenamiento */ } }, [e]);
@@ -168,12 +170,10 @@ export default function Cotizar() {
             <div className="bg-white p-7 shadow-tarjeta">
               <h2 className="text-xl font-bold text-azul-tinta">Paga tu primera cuota</h2>
               <p className="text-sm text-gris-texto">Póliza {numPoliza(e.poliza)} · {prod.nombre} plan {plan.plan_nombre}</p>
-              <Selector label="Medio de pago" value={medio} onChange={(x) => setMedio(x.target.value)}>
-                <option value="pse">PSE – débito desde tu banco</option><option value="tarjeta">Tarjeta de crédito</option><option value="transferencia">Transferencia</option>
-              </Selector>
+              <MediosPago medio={medio} setMedio={setMedio} setListo={setMedioListo} referencia={numPoliza(e.poliza)} />
               <div className="mt-4"><Linea k="Cuota mensual" v={<span className="text-rojo">{dinero(plan.prima_mensual)}</span>} /></div>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Boton disabled={ocupado} onClick={pagar}>Pagar {dinero(plan.prima_mensual)}</Boton>
+                <Boton disabled={ocupado || !medioListo} onClick={pagar}>Pagar {dinero(plan.prima_mensual)}</Boton>
                 <Link to="/mi-cuenta/seguros" className="border-2 border-azul px-6 py-2.5 font-bold text-azul hover:bg-azul-claro">Pagar después</Link>
               </div>
               {msg && <Mensaje tipo={msg[0]}>{msg[1]}</Mensaje>}
