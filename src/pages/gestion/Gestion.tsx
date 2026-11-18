@@ -274,7 +274,8 @@ function VPolizas() {
 }
 
 function VPagos() {
-  const c = useCarga(() => api<Poliza[]>("/api/v1/polizas"), []);
+  // Solo las pólizas vigentes admiten pagos (una cancelada o vencida no se cobra).
+  const c = useCarga(async () => (await api<Poliza[]>("/api/v1/polizas")).filter((x) => x.status === "activa"), []);
   const [sel, setSel] = useState("");
   const id = sel || c.datos?.[0]?.id_poliza || "";
   // Historial de pagos + comprobantes de la póliza (Documentación los genera al recibir payment.completed).
@@ -293,8 +294,9 @@ function VPagos() {
   return conCarga(c, (polizas) => (
     <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
       <Tarjeta titulo="Registrar pago de prima">
-        {!polizas.length && <Mensaje>No hay pólizas.</Mensaje>}
-        <Selector label="Póliza" value={id} onChange={(e) => setSel(e.target.value)}>{polizas.map((x) => <option key={x.id_poliza} value={x.id_poliza}>{numPoliza(x)} · {dinero(x.premium)}</option>)}</Selector>
+        {!polizas.length && <Mensaje>No hay pólizas vigentes.</Mensaje>}
+        <Selector label="Póliza vigente" value={id} onChange={(e) => setSel(e.target.value)}>{polizas.map((x) => <option key={x.id_poliza} value={x.id_poliza}>{numPoliza(x)} · {dinero(x.premium)}</option>)}</Selector>
+        <p className="mt-1 text-xs text-gris-texto">Solo aparecen pólizas vigentes: las canceladas o vencidas no admiten pagos.</p>
         <div className="grid grid-cols-2 gap-x-3"><Entrada label="Valor" type="number" value={f.valor} onChange={(e) => setF({ ...f, valor: e.target.value })} />
           <Selector label="Medio" value={f.metodo} onChange={(e) => setF({ ...f, metodo: e.target.value })}><option value="pse">PSE</option><option value="tarjeta">Tarjeta</option><option value="transferencia">Transferencia</option></Selector></div>
         <Entrada label="Vencimiento de la cuota" type="date" value={f.venc} onChange={(e) => setF({ ...f, venc: e.target.value })} />
